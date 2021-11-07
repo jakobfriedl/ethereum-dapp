@@ -37,7 +37,7 @@
                     ]
 
                     const contract = new ethers.Contract(contractAddress, contractABI, signer)
-                    const symbol = await contact.symbol()
+                    const symbol = await contract.symbol()
 
                     tx = await contract.transfer(recipient, ethers.utils.parseUnits(amount))
                     await tx.wait()
