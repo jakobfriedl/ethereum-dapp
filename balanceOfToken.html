@@ -4,14 +4,78 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
         <title>Balance of ERC20 Token</title>
     </head>
     <body>
-        <button onclick="getBalanceOfToken()">Get Balance of ERC20 Token</button> 
+        <button onclick="getBalanceOfToken()">Get Balance of ERC20 Token</button>
+        <div>
+            <div>
+                <label for="name">Token-Name:</label><br>
+                <input type="text" name="name" id="tokenName" disabled>
+            </div>
+            <div>
+                <label for="symbol">Token-Symbol:</label><br>
+                <input type="text" name="symbol" id="tokenSymbol" disabled>
+            </div>
+            <div>
+                <label for="address">Address:</label><br>
+                <input type="text" name="address" id="address" disabled>
+            </div>
+            <div>
+                <label for="balance">Balance:</label><br>
+                <input type="text" name="balance" id="balance" disabled>
+            </div>
+        </div>
 
         <script>
-            function getBalanceOfToken(){
-                console.log("test"); 
+            function isInstalled() {
+                return typeof window.ethereum !== 'undefined'
+            }
+            
+            getAccount()
+            var currentUser
+
+            async function getBalanceOfToken(){
+                if(isInstalled()){
+                    const provider = new ethers.providers.Web3Provider(window.ethereum)
+                    const signer = provider.getSigner()
+
+                    const contractAddress = "0x8aA7492ce9FD265443698646D41e1a84Ce4D10Eb"
+
+                    const contractABI = [
+                        "function name() view returns (string)",
+                        "function symbol() view returns (string)",
+                        "function decimals() view returns (uint8)",
+                        "function balanceOf(address) view returns (uint)",
+                        "function transfer(address to, uint amount)",
+                        "event Transfer(address indexed from, address indexed to, uint amount)"
+                    ]
+
+                    const contract = new ethers.Contract(contractAddress, contractABI, provider)
+
+                    const name = await contract.name()
+                    const symbol = await contract.symbol()
+                    const decimals = await contract.decimals()
+                    // currentUser = "0x15433da387451f9de4565280c85506cb71af9376"
+                    const balance = await contract.balanceOf(currentUser)
+                    const balanceFormatted = ethers.utils.formatUnits(balance, decimals)
+                    
+                    document.getElementById('tokenName').value = name
+                    document.getElementById('tokenSymbol').value = symbol
+                    document.getElementById('address').value = currentUser
+                    document.getElementById('balance').value = balanceFormatted
+
+                }else{
+                    alert("Metamask is not installed")
+                }
+            }
+            
+            async function getAccount() {
+                const accounts = await ethereum.request({
+                    method: 'eth_requestAccounts'
+                })
+                currentUser = accounts[0]; 
             }
         </script>
     </body>

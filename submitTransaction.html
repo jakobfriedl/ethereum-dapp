@@ -4,14 +4,56 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
         <title>Submit Transaction</title>
     </head>
     <body>
         <button onclick="submitTransaction()">Submit Transaction</button> 
 
         <script>
-            function submitTransaction(){
-                console.log("test"); 
+            function isInstalled() {
+                return typeof window.ethereum !== 'undefined'
+            }
+            
+            getAccount()
+            var currentUser
+            const recipient = "0x15433DA387451F9dE4565280C85506CB71aF9376"
+            const amount = "10"
+
+            async function submitTransaction(){
+                if(isInstalled()){
+                    const provider = new ethers.providers.Web3Provider(window.ethereum)
+                    const signer = provider.getSigner()
+
+                    const contractAddress = "0x8aA7492ce9FD265443698646D41e1a84Ce4D10Eb"
+
+                    const contractABI = [
+                        "function name() view returns (string)",
+                        "function symbol() view returns (string)",
+                        "function balanceOf(address) view returns (uint)",
+                        "function decimals() view returns (uint8)",
+                        "function transfer(address to, uint amount)",
+                        "event Transfer(address indexed from, address indexed to, uint amount)"
+                    ]
+
+                    const contract = new ethers.Contract(contractAddress, contractABI, signer)
+                    const symbol = await contact.symbol()
+
+                    tx = await contract.transfer(recipient, ethers.utils.parseUnits(amount))
+                    await tx.wait()
+
+                    console.log(`Transaction successful. ${currentUser} sent 10 ${symbol} to ${recipient}`)
+
+                }else{
+                    alert("Metamask is not installed")
+                }
+            }
+            
+            async function getAccount() {
+                const accounts = await ethereum.request({
+                    method: 'eth_requestAccounts'
+                })
+                currentUser = accounts[0]; 
             }
         </script>
     </body>
